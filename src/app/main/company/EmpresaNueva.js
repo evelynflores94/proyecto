@@ -16,6 +16,9 @@ const EmpresaNueva = () => {
   const [paises, setPais] = useState([""])
   const [paisId, setPaisId] = useState("")
   const [ciudades, setCiudades] = useState([""])
+  const [image, setImage] = useState("")
+
+  const [file, setFile] = useState([""])
 
   //para guardar los datos
 
@@ -27,7 +30,7 @@ const EmpresaNueva = () => {
     emp_contacto: "",
     emp_direccion: "",
     emp_telefono: "",
-    // emp_logo: "",
+    emp_logo: "",
     emp_email: "",
     ciudadId: "",
     tipoClienteId: ""
@@ -53,6 +56,44 @@ const EmpresaNueva = () => {
 
     ///   console.log(data)
   }
+  /* 
+  const handleChangeImg = ({ target }) => {
+    setFile({ ...file, [e.target.name]: e.target.files[0] })
+  }
+
+   */
+  const handleChangePreview = (e) => {
+    setImage(URL.createObjectURL(e.target.files[0]))
+    setFile({
+      [e.target.name]: e.target.files[0]
+    })
+
+    ///setData({ emp_logo: image })
+    //setData(data.emp_logo : image)
+    console.log("urlImagen: " + image)
+    console.log("file: " + file)
+    console.log("Valor del emp_logo " + data.emp_logo)
+
+    convertBase64(e.target.files[0])
+  }
+
+  const convertBase64 = (file) => {
+    //Array.from(file)
+    var reader = new FileReader()
+    reader.readAsDataURL(file)
+    reader.onload = function () {
+      var arrayAux = []
+      var base64 = reader.result
+      arrayAux = base64.split(",")
+      console.log(arrayAux[1])
+    }
+
+    setData({
+      emp_logo: arrayAux[1]
+    })
+
+    console.log("data log" + data.emp_logo)
+  }
 
   useEffect(() => {
     obtenerTipos(), obtenerPaises()
@@ -67,8 +108,60 @@ const EmpresaNueva = () => {
     })
   }, [paisId])
 
+  //guardar con imagen
+
+  /*   const handleSubmit = async (e) => {
+    e.preventDefault()
+
+    const config = {
+        headers:{
+            'Content-Type': 'multipart/form-data'
+          }
+    }
+    console.log( "logo enviado: "+ file)
+
+    const dataf = new FormData()
+
+    dataf.append('emp_ci', data.emp_ci)
+    console.log("formaat")
+    console.log(dataf.get("emp_ci"))
+    dataf.append("emp_logo", file)
+    console.log(dataf.get("emp_logo"))
+    dataf.append("emp_nombre", data.emp_nombre)
+    dataf.append("emp_rep_legal", data.emp_rep_legal)
+    dataf.append("emp_contacto", data.emp_contacto)
+    dataf.append("emp_direccion", data.emp_direccion)
+    dataf.append("emp_telefono", data.emp_telefono)
+    dataf.append("emp_email", data.emp_email)
+    dataf.append("ciudadId", data.ciudadId)
+    dataf.append("tipoClienteId", data.tipoClienteId)
+    // console.log("sin formato" + data.emp_logo)
+    // const formData = new FormData()
+    // formData.append("emp_logo", data.emp_logo)
+    // console.log(formData)
+    // setData({ emp_logo: formData })
+    // console.log("data: " + data)
+
+    // console.log("con formato en logo" + data)
+    const response = await axios.post(
+      `http://localhost:3005/api/v1/empresa`,
+      dataf,{
+        headers:{
+            'Content-Type': 'multipart/form-data'
+          }
+    }
+    )
+    if (response.status === 201) {
+      Swal.fire("Guardado!", `El registro se guardo exitosamente`, "success")
+      navigate("/empresa")
+    } else {
+      Swal.fire("Error!", "Hubo un problema al crear el registro!", "error")
+    }
+  } */
   const handleSubmit = async (e) => {
     e.preventDefault()
+    console.log("Data: " + data.emp_ci)
+    console.log("logo: " + data.emp_logo)
     const response = await axios.post(
       `http://localhost:3005/api/v1/empresa`,
       data
@@ -92,6 +185,7 @@ const EmpresaNueva = () => {
             name="empresaForm"
             className="flex flex-col justify-center w-full mt-32"
             onSubmit={handleSubmit}
+            noValidate
           >
             <div className="flex flex-row w-full">
               <div className="col flex-col w-full">
@@ -186,13 +280,14 @@ const EmpresaNueva = () => {
                 <label htmlFor="logo">Logo</label>
                 <br></br>
                 <TextField
-                  ///name="emp_logo"
+                  name="emp_logo"
                   type="file"
-                  //value={data.emp_logo}
-                  onChange={handleChange}
+                  /// value={data.emp_logo}
+                  onChange={handleChangePreview}
                   className="mb-24"
                   variant="outlined"
                 />
+                <img src={image}></img>
               </div>
               <div className="col flex-col w-full">
                 <label htmlFor="razonSocial">Razon Social</label>

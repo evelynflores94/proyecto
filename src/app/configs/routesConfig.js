@@ -7,12 +7,13 @@ import SignUpConfig from "../main/sign-up/SignUpConfig"
 import SignOutConfig from "../main/sign-out/SignOutConfig"
 import Error404Page from "../main/404/Error404Page"
 import ExampleConfig from "../main/example/ExampleConfig"
-import UsuariosLista from "../main/usuarios/UsuariosLista"
-import UsuariosNuevo from "../main/usuarios/UsuariosNuevo"
-import UsuariosEdit from "../main/usuarios/UsuariosEdit"
-import EmpresaLista from "../main/empresa/EmpresaLista"
-import EmpresaNueva from "../main/empresa/EmpresaNueva"
-import EmpresaEdit from "../main/empresa/EmpresaEdit"
+import UsersList from "../main/users/UsersList"
+import UserNew from "../main/users/UserNew"
+import UserEdit from "../main/users/UserEdit"
+import CompanyList from "../main/company/CompanyList"
+import EmpresaNueva from "../main/company/EmpresaNueva"
+import EmpresaEdit from "../main/company/EmpresaEdit"
+import CompanyPlan from "../main/company/CompanyPlan"
 
 const routeConfigs = [ExampleConfig, SignOutConfig, SignInConfig, SignUpConfig]
 
@@ -42,22 +43,28 @@ const routes = [
   },
   {
     path: "users",
-    element: <UsuariosLista />
+    element: <UsersList />
   },
 
   {
-    path: "userNuevo",
-    element: <UsuariosNuevo />
+    path: "userNew",
+    element: <UserNew />
   },
 
   {
     path: "userEdit/:id",
-    element: <UsuariosEdit />
+    element: <UserEdit />
   },
 
   {
-    path: "empresa",
-    element: <EmpresaLista />
+    path: "company",
+    element: <CompanyList />,
+    children: [
+      {
+        path: ":id",
+        element: <EmpresaEdit />
+      }
+    ]
   },
   {
     path: "empresaNueva",
@@ -67,6 +74,10 @@ const routes = [
   {
     path: "empresaEdit/:id",
     element: <EmpresaEdit />
+  },
+  {
+    path: "plan",
+    element: <CompanyPlan />
   }
 ]
 

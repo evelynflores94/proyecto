@@ -1,23 +1,23 @@
 import React, { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import { Container } from "react-bootstrap"
 import axios from "axios"
-import Swal from "sweetalert2"
-import { Container } from "@mui/material"
 import Table from "@mui/material/Table"
 import TableCell from "@mui/material/TableCell"
 import TableRow from "@mui/material/TableRow"
-import Typography from "@mui/material/Typography"
 import Button from "@mui/material/Button"
+import Swal from "sweetalert2"
+import Typography from "@mui/material/Typography"
 import TextField from "@mui/material/TextField"
 import SearchIcon from "@mui/icons-material/Search"
 import TablePagination from "@mui/material/TablePagination"
 
-const EmpresaLista = () => {
+const UsersList = () => {
   const navigate = useNavigate()
-  const [empresas, setEmpresas] = useState([""])
-  const [tablaEmpresas, setTablaEmpresas] = useState([""])
-  //para la busqueda
-  const [busqueda, setBusqueda] = useState("")
+
+  const [users, setUser] = useState([])
+  const [tableUsers, setTableUsers] = useState([""])
+  const [search, setSearch] = useState("")
 
   //para la paginacion
   const [page, setPage] = useState(0)
@@ -35,31 +35,35 @@ const EmpresaLista = () => {
     setPage(0)
   }
 
-  const obtenerEmpresas = () => {
-    axios.get("http://localhost:3005/api/v1/empresa").then((res) => {
-      setEmpresas(res.data)
-      setTablaEmpresas(res.data)
+  const getUsuarios = () => {
+    axios.get(`http://localhost:3005/api/v1/users`).then((res) => {
+      setUser(res.data)
+      setTableUsers(res.data)
     })
   }
 
-  const handleChangeBuscar = (e) => {
-    setBusqueda(e.target.value)
-    filtrarBusqueda(e.target.value)
-  }
-
-  const filtrarBusqueda = (buscar) => {
-    var resultadoBusqueda = tablaEmpresas.filter((el) => {
+  const filterByName = (search) => {
+    var resultSearch = tableUsers.filter((el) => {
       if (
-        el.emp_nombre.toString().toLowerCase().includes(buscar.toLowerCase()) ||
-        el.emp_rep_legal.toString().toLowerCase().includes(buscar.toLowerCase())
+        el.name.toString().toLowerCase().includes(search.toLowerCase()) ||
+        el.email.toString().toLowerCase().includes(search.toLowerCase()) ||
+        el.empresa.emp_nombre
+          .toString()
+          .toLowerCase()
+          .includes(search.toLowerCase())
       ) {
         return el
       }
     })
-    setEmpresas(resultadoBusqueda)
+    setUser(resultSearch)
   }
 
-  function eliminaEpresa(id) {
+  const handleSearch = (e) => {
+    setSearch(e.target.value)
+    filterByName(e.target.value)
+  }
+
+  function deleteUser(id) {
     Swal.fire({
       title: `Estás seguro de eliminar`,
       text: "Esta acción no se puede deshacer!",
@@ -72,7 +76,7 @@ const EmpresaLista = () => {
     }).then((result) => {
       if (result.isConfirmed) {
         axios
-          .delete(`http://localhost:3005/api/v1/empresa/${id}`)
+          .delete(`http://localhost:3005/api/v1/users/${id}`)
           .then((response) => {
             if (response.status === 201) {
               Swal.fire(
@@ -81,7 +85,7 @@ const EmpresaLista = () => {
                 "success"
               )
 
-              obtenerEmpresas()
+              getUsuarios()
             } else {
               Swal.fire(
                 "Error!",
@@ -93,99 +97,83 @@ const EmpresaLista = () => {
       }
     })
   }
+
   useEffect(() => {
-    obtenerEmpresas()
+    getUsuarios()
   }, [])
 
   return (
     <Container className="mb-5">
       <div>
         <Typography className=" text-center mt-32 text-4xl font-extrabold tracking-tight leading-tight">
-          Lista de Empresas
+          Lista de Usuarios
         </Typography>
       </div>
-
-      <div className="flex flex-row   items-center">
+      <div className="flex flex-row   items-center  ml-32">
         <TextField
           className="w-1/4"
-          placeholder="Buscar por Nombre o Representante"
-          value={busqueda}
-          onChange={handleChangeBuscar}
+          placeholder="Buscar por Nombre,email,empresa"
+          value={search}
+          onChange={handleSearch}
         ></TextField>
 
         <SearchIcon color="secondary" fontSize="large" />
-
-        {/* <Button
-          variant="contained"
-          color="secondary"
-          type="button"
-          //  onClick={() => navigate(`/userEdit/${user.id}`)}
-        >
-          Buscar
-        </Button> */}
       </div>
 
+      <br></br>
       <div className="row">
         <Table>
           <thead>
             <tr>
-              <th> Ruc</th>
-              <th> Razon social</th>
-              <th> Nombre Comercial</th>
-              <th> Representante legal</th>
-              <th> N. Contacto</th>
-              <th> Correo contacto</th>
-
+              <th> Nombre de usuario</th>
+              <th> Email</th>
+              <th> Rol</th>
+              <th> Empresa</th>
               <th>
                 <Button
                   variant="contained"
                   color="secondary"
                   type="button"
                   size="small"
-                  onClick={() => navigate("/empresaNueva")}
+                  onClick={() => navigate("/userNew")}
                 >
-                  Nueva Empresa
+                  Agregar Usuario
                 </Button>
               </th>
             </tr>
           </thead>
           <tbody>
             {(rowsPerPage > 0
-              ? empresas.slice(
+              ? users.slice(
                   page * rowsPerPage,
                   page * rowsPerPage + rowsPerPage
                 )
-              : empresas
-            ).map((emp) => (
-              //{empresas.map((emp) => (
-              <TableRow>
-                <TableCell align="center"> {emp.emp_ci} </TableCell>
-                <TableCell align="center"> {emp.emp_razon_soc}</TableCell>
-                <TableCell align="center"> {emp.emp_nombre}</TableCell>
-                <TableCell align="center"> {emp.emp_rep_legal} </TableCell>
-                <TableCell align="center"> {emp.emp_contacto}</TableCell>
-                <TableCell align="center"> {emp.emp_email}</TableCell>
+              : users
+            ).map((user) => (
+              <TableRow key={user.id}>
+                <TableCell align="center"> {user.name} </TableCell>
+                <TableCell align="center"> {user.email}</TableCell>
+                <TableCell align="center"> {user.typeUser.name}</TableCell>
+                <TableCell align="center"> {user.empresa.emp_nombre}</TableCell>
+                <TableCell align="center">
+                  <Button
+                    variant="contained"
+                    color="error"
+                    type="button"
+                    size="small"
+                    onClick={() => deleteUser(user.id)}
+                  >
+                    Eliminar
+                  </Button>
 
-                <TableCell align="center" className="w-1/6">
                   <Button
                     variant="contained"
                     color="secondary"
                     type="button"
                     size="small"
-                    onClick={() => navigate(`/empresaEdit/${emp.emp_id}`)}
+                    onClick={() => navigate(`/userEdit/${user.id}`)}
                   >
                     Editar
-                  </Button>
-
-                  <Button
-                    className="ml-12"
-                    variant="contained"
-                    color="error"
-                    type="button"
-                    size="small"
-                    onClick={() => eliminaEpresa(emp.emp_id)}
-                  >
-                    Eliminar
                   </Button>
                 </TableCell>
               </TableRow>
@@ -194,7 +182,7 @@ const EmpresaLista = () => {
           <TablePagination
             rowsPerPageOptions={[5, 10, 25, { label: "All", value: -1 }]}
             colSpan={3}
-            count={empresas.length}
+            count={users.length}
             rowsPerPage={rowsPerPage}
             page={page}
             onPageChange={handleChangePage}
@@ -207,4 +195,4 @@ const EmpresaLista = () => {
   )
 }
 
-export default EmpresaLista
+export default UsersList
